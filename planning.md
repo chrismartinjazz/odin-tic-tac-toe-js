@@ -6,10 +6,10 @@
   - Gameboard object with 'board' array, as an IIFE (module pattern)
   - Player objects
   - Object to control flow of game (Game?)
-  - displayController as an IIFE (module)
   - Player can make moves
   - Check for 3-in a row and for ties (win / draw condition)
 - Build another Object to handle display/DOM logic.
+  - DisplayController as an IIFE (module)
   - Function to render contents of board array to webpage
   - Functions allowing players to add marks to specific spot on board by clicking on a board square to place marker.
   - Ensure can't play in spots already taken.
