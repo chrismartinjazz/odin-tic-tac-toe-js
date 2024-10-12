@@ -9,13 +9,20 @@
   - DONE Player can make moves
   - DONE Check for 3-in a row and for ties (win / draw condition)
 - Build another Object to handle display/DOM logic.
-  - DisplayController as an IIFE (module)
-  - Function to render contents of board array to webpage
-  - Functions allowing players to add marks to specific spot on board by clicking on a board square to place marker.
-  - Ensure can't play in spots already taken.
+  - DONE DisplayController (as an IIFE (module) - not done)
+  - DONE Function to render contents of board array to webpage
+  - DONE Functions allowing players to add marks to specific spot on board by clicking on a board square to place marker.
+  - DONE Ensure can't play in spots already taken.
+  - DONE Display scoreboard
+  - DONE Visually indicate current player
 - Add functionality:
+  - At end of game (won or tied)
+    - (Dialog to announce winner, confirmation button to start next game)
+    - Rotate player tokens
+    - Clear board
+    - Set current player to player with X token
   - Players put in own names
-  - Button to start / restart game
+  - Button to restart game (reset scores)
   - Display element to show results.
 - Styling and images etc.
 

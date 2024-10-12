@@ -74,14 +74,14 @@ function Cell() {
 function ScoreBoard() {
   let playerOneScore = 0;
   let playerTwoScore = 0;
-  let tie = 0;
+  let tieScore = 0;
 
-  const getScores = () => { return { playerOneScore, playerTwoScore, tie } }
+  const getScores = () => { return { playerOneScore, playerTwoScore, tieScore } }
 
   const updateScore = (winner) => {
     switch (winner) {
       case "tie":
-        tie++;
+        tieScore++;
         break;
       case 1:
         playerOneScore++;
@@ -96,31 +96,33 @@ function ScoreBoard() {
   return { updateScore, getScores }
 }
 
-function Player(name, token) {
-  const playerName = name;
-  const playerToken = token;
+function Player(newName, newNumber, newToken) {
+  const name = newName;
+  const number = newNumber;
+  const token = newToken;
 
-  const getPlayer = () => { return { playerName, playerToken } };
+  const getPlayer = () => { return { name, number, token } };
   const setName = (newName) => name = newName;
+  const setToken = (newToken) => token = newToken;
 
-  return { getPlayer, setName }
+  return { getPlayer, setName, setToken }
 }
 
 function GameController() {
-  const playerOne = new Player("Player One", 1);
-  const playerTwo = new Player("Player Two", 2);
+  const playerOne = new Player("Player One", 1, "X");
+  const playerTwo = new Player("Player Two", 2, "O");
   const board = GameBoard();
   const score = ScoreBoard();
   let currentPlayer = playerOne;
   let gameOver = false;
 
-  const getCurrentPlayer = () => currentPlayer
+  const getCurrentPlayer = () => currentPlayer.getPlayer()
   const makeMove = (position) => {
     // Update the board. If successful (move is valid, game is not over),
     // rotate current player, check for win conditions, update score.
     // Otherwise return false.
     if (gameOver) return false;
-    if (board.updateBoard(position, currentPlayer.getPlayer().playerToken)) {
+    if (board.updateBoard(position, currentPlayer.getPlayer().number)) {
       currentPlayer === playerOne ? currentPlayer = playerTwo : currentPlayer = playerOne;
       if (board.checkWinConditions()) {
         score.updateScore(board.checkWinConditions());
@@ -128,21 +130,34 @@ function GameController() {
       }
     } else { return false };
   }
-  // Returning for testing in console
-  return { board, score, makeMove, getCurrentPlayer }
+
+  const getPlayers = () => {
+    return [playerOne.getPlayer(), playerTwo.getPlayer()]
+  }
+
+  return { board, score, makeMove, getCurrentPlayer, getPlayers }
 }
 
 function DisplayController() {
   const game = GameController();
 
+  const playerOneName = document.querySelector("#playerOneName");
+  const playerTwoName = document.querySelector("#playerTwoName");
+  const playerOneWins = document.querySelector("#playerOneWins");
+  const playerTwoWins = document.querySelector("#playerTwoWins");
+  const tiedGames = document.querySelector("#tiedGames");
+  const setPlayerNamesButton = document.querySelector("#setPlayerNamesButton");
+  const resetScoresButton = document.querySelector("#resetScoresButton");
   let displayGrid = []
   for (let i = 0; i < cellCount; i++) {
     displayGrid.push(document.querySelector(`#cell${i}`));
   }
 
+  // When a cell is clicked, make a move for current player
   for (let i = 0; i < cellCount; i++) {
     displayGrid[i].addEventListener("click", (event) => {
       game.makeMove(i);
+      displayScoreBoard();
       displayBoard();
     })
   }
@@ -154,22 +169,46 @@ function DisplayController() {
   }
 
   const convertValue = (val) => {
+    let players = game.getPlayers();
     switch (val) {
       case 1:
-        return "X";
+        return players.find((player) => player.number === 1).token;
       case 2:
-        return "O";
+        return players.find((player) => player.number === 2).token;
       default:
         return "";
     }
   }
 
+  const displayScoreBoard = () => {
+    let score = game.score.getScores()
+    let players = game.getPlayers();
+    let currentPlayer = game.getCurrentPlayer();
+    let playerOne = players.find((player) => player.number === 1);
+    let playerTwo = players.find((player) => player.number === 2);
+
+    playerOneName.innerHTML = `${playerOne.name}: ${playerOne.token}`
+    playerTwoName.innerHTML = `${playerTwo.name}: ${playerTwo.token}`
+    playerOneWins.innerHTML = `${score.playerOneScore}`
+    playerTwoWins.innerHTML = `${score.playerTwoScore}`
+    tiedGames.innerHTML = `${score.tieScore}`
+
+    if (currentPlayer.number === 1) {
+      playerOneName.classList.add("selected-player");
+      playerTwoName.classList.remove("selected-player");
+    } else {
+      playerOneName.classList.remove("selected-player");
+      playerTwoName.classList.add("selected-player");
+    }
+  }
+
   return {
-    displayBoard, game
+    displayBoard, displayScoreBoard, game
   };
 }
 
 display = DisplayController();
+display.displayScoreBoard();
 display.displayBoard();
 
 // Example game in console.
