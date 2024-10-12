@@ -60,7 +60,7 @@ function GameBoard() {
     }
   }
 
-  return { getBoard, printBoard, updateBoard, checkWinConditions, clearBoard };
+  return { getBoard, printBoard, updateBoard, checkWinConditions, clearBoard, updateBoard, checkWinConditions, clearBoard };
 }
 
 function Cell() {
