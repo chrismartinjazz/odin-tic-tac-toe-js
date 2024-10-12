@@ -2,7 +2,7 @@ const cellCount = 9;
 
 function GameBoard() {
   // Initialize board with getter
-  const board = [];
+  let board = [];
   for (let i = 0; i < cellCount; i++) {
     board.push(Cell());
   }
@@ -93,13 +93,19 @@ function ScoreBoard() {
         return;
     }
   }
-  return { updateScore, getScores }
+
+  const resetScores = () => {
+    playerOneScore = 0;
+    playerTwoScore = 0;
+    tieScore = 0;
+  }
+  return { updateScore, getScores, resetScores }
 }
 
 function Player(newName, newNumber, newToken) {
-  const name = newName;
+  let name = newName;
   const number = newNumber;
-  const token = newToken;
+  let token = newToken;
 
   const getPlayer = () => { return { name, number, token } };
   const setName = (newName) => name = newName;
@@ -117,25 +123,63 @@ function GameController() {
   let gameOver = false;
 
   const getCurrentPlayer = () => currentPlayer.getPlayer()
+  const getGameOver = () => gameOver;
+
   const makeMove = (position) => {
     // Update the board. If successful (move is valid, game is not over),
-    // rotate current player, check for win conditions, update score.
-    // Otherwise return false.
+    // rotate current player, check for win conditions, update score, return false.
+    // If game is won or tied, return result (1, 2, or "tie")
     if (gameOver) return false;
     if (board.updateBoard(position, currentPlayer.getPlayer().number)) {
       currentPlayer === playerOne ? currentPlayer = playerTwo : currentPlayer = playerOne;
-      if (board.checkWinConditions()) {
+      // If game is won, update the score, stop gameplay, rotate player tokens, 
+      // and return the result as 1, 2, or tie
+      let result = board.checkWinConditions();
+      if (result) {
         score.updateScore(board.checkWinConditions());
         gameOver = true;
+        return result;
       }
+      return false;
     } else { return false };
+  }
+
+  const rotatePlayerTokens = () => {
+    if (playerOne.getPlayer().token === "X") {
+      playerOne.setToken("O");
+      playerTwo.setToken("X");
+    } else {
+      playerOne.setToken("X");
+      playerTwo.setToken("O");
+    }
+  }
+
+  const newGame = () => {
+    board.clearBoard();
+    rotatePlayerTokens();
+    playerOne.getPlayer().token === "X" ? currentPlayer = playerOne : currentPlayer = playerTwo;
+    gameOver = false;
+  }
+
+  const resetGame = () => {
+    board.clearBoard();
+    score.resetScores();
+    playerOne.setToken("X");
+    playerTwo.setToken("O");
+    currentPlayer = playerOne;
+    gameOver = false;
+  }
+
+  const updatePlayerNames = (newPlayerOneName, newPlayerTwoName) => {
+    playerOne.setName(newPlayerOneName);
+    playerTwo.setName(newPlayerTwoName);
   }
 
   const getPlayers = () => {
     return [playerOne.getPlayer(), playerTwo.getPlayer()]
   }
 
-  return { board, score, makeMove, getCurrentPlayer, getPlayers }
+  return { board, score, makeMove, getCurrentPlayer, getPlayers, newGame, resetGame, updatePlayerNames, getGameOver }
 }
 
 function DisplayController() {
@@ -148,37 +192,42 @@ function DisplayController() {
   const tiedGames = document.querySelector("#tiedGames");
   const setPlayerNamesButton = document.querySelector("#setPlayerNamesButton");
   const resetScoresButton = document.querySelector("#resetScoresButton");
+  const nextGameButton = document.querySelector("#nextGameButton");
   let displayGrid = []
   for (let i = 0; i < cellCount; i++) {
     displayGrid.push(document.querySelector(`#cell${i}`));
   }
 
-  // When a cell is clicked, make a move for current player
+  // When a cell is clicked, make a move for current player unless the game is over.
   for (let i = 0; i < cellCount; i++) {
-    displayGrid[i].addEventListener("click", (event) => {
-      game.makeMove(i);
+    displayGrid[i].addEventListener("click", () => {
+      if (game.getGameOver()) return;
+
+      let result = game.makeMove(i);
       displayScoreBoard();
       displayBoard();
-    })
-  }
+      if (result) { enableNextGameButton() };
+    });
+  };
 
-  const displayBoard = () => {
-    for (let i = 0; i < cellCount; i++) {
-      displayGrid[i].innerHTML = convertValue(game.board.getBoard()[i].getValue());
-    }
-  }
+  // When the Next Game button is clicked, start next game
+  nextGameButton.addEventListener("click", () => {
+    game.newGame();
+    nextGameButton.disabled = true;
+    displayScoreBoard();
+    displayBoard();
+  })
 
-  const convertValue = (val) => {
-    let players = game.getPlayers();
-    switch (val) {
-      case 1:
-        return players.find((player) => player.number === 1).token;
-      case 2:
-        return players.find((player) => player.number === 2).token;
-      default:
-        return "";
-    }
-  }
+  // When the Reset Scores button is clicked, reset the scores
+  resetScoresButton.addEventListener("click", () => {
+    game.resetGame();
+    nextGameButton.disabled = true;
+    displayScoreBoard();
+    displayBoard();
+  })
+
+  // When the Set Player Names button is clicked, show the form
+  initializeDialog();
 
   const displayScoreBoard = () => {
     let score = game.score.getScores()
@@ -202,6 +251,62 @@ function DisplayController() {
     }
   }
 
+  const displayBoard = () => {
+    for (let i = 0; i < cellCount; i++) {
+      displayGrid[i].innerHTML = convertValue(game.board.getBoard()[i].getValue());
+    };
+  };
+
+  const convertValue = (val) => {
+    let players = game.getPlayers();
+    switch (val) {
+      case 1:
+        return players.find((player) => player.number === 1).token;
+      case 2:
+        return players.find((player) => player.number === 2).token;
+      default:
+        return "";
+    }
+  }
+
+  const enableNextGameButton = () => {
+    nextGameButton.disabled = false;
+    playerOneName.classList.remove("selected-player");
+    playerTwoName.classList.remove("selected-player");
+  }
+
+  function initializeDialog() {
+    const dialog = document.querySelector("dialog");
+    const closeButton = document.querySelector(".close-dialog");
+    const form = document.querySelector("form");
+
+    setPlayerNamesButton.addEventListener("click", () => {
+      dialog.showModal();
+    });
+
+    // Close the dialog using button.
+    closeButton.addEventListener("click", () => {
+      dialog.close();
+    });
+
+    // Update player names with submitted form data.
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (event.submitter.classList.contains("submit-dialog")) {
+        const newPlayerOneName = document.getElementById("newPlayerOneName").value;
+        const newPlayerTwoName = document.getElementById("newPlayerTwoName").value;
+
+        game.updatePlayerNames(newPlayerOneName, newPlayerTwoName);
+      }
+      dialog.close();
+
+      form.reset();
+
+      displayScoreBoard();
+      displayBoard();
+    })
+  }
+
   return {
     displayBoard, displayScoreBoard, game
   };
@@ -210,39 +315,3 @@ function DisplayController() {
 display = DisplayController();
 display.displayScoreBoard();
 display.displayBoard();
-
-// Example game in console.
-
-// const game = GameController("Chris", "John");
-// console.table(game.score.getScores());
-// game.board.printBoard();
-
-// game.makeMove(0);
-// game.board.printBoard();
-// console.log(`Winner: ${game.board.checkWinConditions()}`);
-// console.log(`Current player: ${game.getCurrentPlayer()}`)
-
-// game.makeMove(1);
-// game.board.printBoard();
-// console.log(`Winner: ${game.board.checkWinConditions()}`);
-// console.log(`Current player: ${game.getCurrentPlayer()}`)
-
-// game.makeMove(4);
-// game.board.printBoard();
-// console.log(`Winner: ${game.board.checkWinConditions()}`);
-// console.log(`Current player: ${game.getCurrentPlayer()}`)
-
-// game.makeMove(5);
-// game.board.printBoard();
-// console.log(`Winner: ${game.board.checkWinConditions()}`);
-// console.log(`Current player: ${game.getCurrentPlayer()}`)
-
-// game.makeMove(8);
-// game.board.printBoard();
-// console.log(`Winner: ${game.board.checkWinConditions()}`);
-// console.log(`Current player: ${game.getCurrentPlayer()}`)
-
-// console.table(game.score.getScores());
-
-// game.makeMove(2);
-// game.board.printBoard();

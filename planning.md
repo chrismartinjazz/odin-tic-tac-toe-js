@@ -16,14 +16,14 @@
   - DONE Display scoreboard
   - DONE Visually indicate current player
 - Add functionality:
-  - At end of game (won or tied)
-    - (Dialog to announce winner, confirmation button to start next game)
-    - Rotate player tokens
-    - Clear board
-    - Set current player to player with X token
-  - Players put in own names
-  - Button to restart game (reset scores)
-  - Display element to show results.
+  - DONE Display element to show results.
+  - DONE At end of game (won or tied)
+    - DONE Button to start next game
+    - DONE Rotate player tokens
+    - DONE Clear board
+    - DONE Set current player to player with X token
+  - DONE Button to restart game (reset scores)
+  - DONE Players put in own names (use dialog and form)
 - Styling and images etc.
 
 ## Looking at <https://www.ayweb.dev/blog/building-a-house-from-the-inside-out>

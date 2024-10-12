@@ -16,6 +16,7 @@
     <div class="hero-right">
       <button class="btn" id="setPlayerNamesButton">Set Player Names</button>
       <button class="btn" id="resetScoresButton">Reset Scores</button>
+      <button class="btn" id="nextGameButton" disabled>Next Game</button>
     </div>
   </div>
 
@@ -40,6 +41,25 @@
     <div id="cell8" class="cell">8</div>
   </div>
 
+  <dialog>
+    <p>Set player names.</p>
+    <form action="#" method="get" class="form">
+      <fieldset>
+        <div class="form-item">
+          <label for="newPlayerOneName">Player one name:</label>
+          <input type="text" id="newPlayerOneName" name="newPlayerOneName">
+        </div>
+        <div class="form-item">
+          <label for="newPlayerTwoName">Player two name:</label>
+          <input type="text" id="newPlayerTwoName" name="newPlayerOneName">
+        </div>
+      </fieldset>
+      <div class="form-buttons">
+        <button class="btn submit-dialog" type="submit">Update Names</button>
+        <button class="btn close-dialog">Cancel</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="scripts/main.js"></script>
 </body>
