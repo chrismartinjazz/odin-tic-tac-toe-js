@@ -1,0 +1,33 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box
+}
+
+.board {
+  display: grid;
+  max-width: 500px;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.cell:hover {
+  background-color: lightcyan;
+}
+
+/* Borders to create grid */
+
+.border-r {
+  border-right: solid black;
+}
+
+.border-b {
+  border-bottom: solid black;
+}
