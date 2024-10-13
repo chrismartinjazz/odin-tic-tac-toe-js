@@ -6,15 +6,10 @@
 
 :root {
   --color1: #E7F2F8;
-  /* Light blue */
   --color2: #74BDCB;
-  /* Dark blue */
   --color3: #FFA384;
-  /* Salmon */
   --color4: #EFE7BC;
-  /* Beige */
 }
-
 
 body {
   font-family: Helvetica, sans-serif;
@@ -42,6 +37,10 @@ body {
   flex: 1;
 }
 
+.hero-left>h1 {
+  color: var(--color4);
+}
+
 .hero-right {
   flex: 1;
   display: flex;
@@ -65,7 +64,6 @@ body {
 
 .score-board__header {
   font-weight: bold;
-  /* border-radius: 2em; */
 }
 
 .selected-player {

@@ -7,25 +7,20 @@ function GameBoard() {
     board.push(Cell());
   }
 
-  const getBoardValues = () => board;
-
   const winConditions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
     [0, 3, 6], [1, 4, 7],
     [2, 5, 8], [0, 4, 8], [2, 4, 6]
   ];
 
-  // Function to print board to console
-  const printBoard = () => {
-    console.log("-----");
-    const boardWithCellValues = board.map((cell) => cell.getValue())
-    for (let i = 0; i < 3; i++) {
-      console.log(`|${boardWithCellValues[3 * i]}${boardWithCellValues[3 * i + 1]}${boardWithCellValues[3 * i + 2]}| Line ${i + 1}`);
-    }
-    console.log("-----");
-  }
+  // Return board values as an array.
+  const getBoardValues = () => {
+    let boardValues = [];
+    board.forEach((element) => boardValues.push(element.getValue()));
+    return boardValues;
+  };
 
-  // Function to update board - returns true if successful, false if move is not possible
+  // Function to update board with a new move. True if successful, false if not.
   const updateBoard = (position, token) => {
     if (board[position].getValue() === 0) {
       board[position].setValue(token);
@@ -35,7 +30,7 @@ function GameBoard() {
     }
   }
 
-  // Function to check for a win or tie. Returns '1', '2', 'tie' or false.
+  // Check board for a win or tie. Returns '1', '2', 'tie' or false.
   const checkWinConditions = () => {
     // Check for a tie - if no positions are "0" then all are taken
     if (board.every((element) => element.getValue() !== 0)) { return 'tie' }
@@ -53,7 +48,7 @@ function GameBoard() {
     return false;
   }
 
-  // Function to reset the board
+  // Clear the board
   const clearBoard = () => {
     board = [];
     for (let i = 0; i < cellCount; i++) {
@@ -61,7 +56,12 @@ function GameBoard() {
     }
   }
 
-  return { getBoard, printBoard, updateBoard, checkWinConditions, clearBoard, updateBoard, checkWinConditions, clearBoard };
+  return {
+    getBoardValues,
+    updateBoard,
+    checkWinConditions,
+    clearBoard,
+  };
 }
 
 function Cell() {
@@ -99,7 +99,7 @@ function ScoreBoard() {
     playerTwoScore = 0;
     tieScore = 0;
   }
-  return { updateScore, getScores, resetScores }
+  return { getScores, updateScore, resetScores }
 }
 
 function Player(newName, newNumber, newToken) {
@@ -115,25 +115,32 @@ function Player(newName, newNumber, newToken) {
 }
 
 function GameController() {
-  const playerOne = new Player("Player One", 1, "X");
-  const playerTwo = new Player("Player Two", 2, "O");
   const board = GameBoard();
   const score = ScoreBoard();
+  const playerOne = new Player("Player One", 1, "X");
+  const playerTwo = new Player("Player Two", 2, "O");
   let currentPlayer = playerOne;
   let gameOver = false;
 
+  const getBoardValues = () => {
+    return board.getBoardValues();
+  }
+  const getScores = () => {
+    return score.getScores();
+  }
+  const getPlayers = () => {
+    return [playerOne.getPlayer(), playerTwo.getPlayer()]
+  }
   const getCurrentPlayer = () => currentPlayer.getPlayer()
   const getGameOver = () => gameOver;
 
+  // Update the board. If successful (move is valid, game is not over),
+  // rotate current player, check for win conditions, update score, return false.
+  // If game is won or tied, return result (1, 2, or "tie")
   const makeMove = (position) => {
-    // Update the board. If successful (move is valid, game is not over),
-    // rotate current player, check for win conditions, update score, return false.
-    // If game is won or tied, return result (1, 2, or "tie")
     if (gameOver) return false;
     if (board.updateBoard(position, currentPlayer.getPlayer().number)) {
       currentPlayer === playerOne ? currentPlayer = playerTwo : currentPlayer = playerOne;
-      // If game is won, update the score, stop gameplay, rotate player tokens, 
-      // and return the result as 1, 2, or tie
       let result = board.checkWinConditions();
       if (result) {
         score.updateScore(board.checkWinConditions());
@@ -144,6 +151,13 @@ function GameController() {
     } else { return false };
   }
 
+  const newGame = () => {
+    board.clearBoard();
+    rotatePlayerTokens();
+    playerOne.getPlayer().token === "X" ? currentPlayer = playerOne : currentPlayer = playerTwo;
+    gameOver = false;
+  }
+
   const rotatePlayerTokens = () => {
     if (playerOne.getPlayer().token === "X") {
       playerOne.setToken("O");
@@ -152,13 +166,6 @@ function GameController() {
       playerOne.setToken("X");
       playerTwo.setToken("O");
     }
-  }
-
-  const newGame = () => {
-    board.clearBoard();
-    rotatePlayerTokens();
-    playerOne.getPlayer().token === "X" ? currentPlayer = playerOne : currentPlayer = playerTwo;
-    gameOver = false;
   }
 
   const resetGame = () => {
@@ -175,11 +182,17 @@ function GameController() {
     playerTwo.setName(newPlayerTwoName);
   }
 
-  const getPlayers = () => {
-    return [playerOne.getPlayer(), playerTwo.getPlayer()]
+  return {
+    getBoardValues,
+    getScores,
+    getPlayers,
+    getCurrentPlayer,
+    getGameOver,
+    makeMove,
+    newGame,
+    resetGame,
+    updatePlayerNames
   }
-
-  return { board, score, makeMove, getCurrentPlayer, getPlayers, newGame, resetGame, updatePlayerNames, getGameOver }
 }
 
 function DisplayController() {
@@ -194,6 +207,7 @@ function DisplayController() {
   const setPlayerNamesButton = document.querySelector("#setPlayerNamesButton");
   const resetScoresButton = document.querySelector("#resetScoresButton");
   const nextGameButton = document.querySelector("#nextGameButton");
+
   let displayGrid = []
   for (let i = 0; i < cellCount; i++) {
     displayGrid.push(document.querySelector(`#cell${i}`));
@@ -205,8 +219,7 @@ function DisplayController() {
       if (game.getGameOver()) return;
 
       let result = game.makeMove(i);
-      displayScoreBoard();
-      displayBoard();
+      updateDisplay();
       if (result) {
         enableNextGameButton();
         displayWinner(result);
@@ -229,7 +242,6 @@ function DisplayController() {
       default:
         winnerText = "";
     }
-    console.log(winnerText);
     scoreBoardOutput.innerHTML = winnerText;
   }
 
@@ -237,8 +249,7 @@ function DisplayController() {
   nextGameButton.addEventListener("click", () => {
     game.newGame();
     nextGameButton.disabled = true;
-    displayScoreBoard();
-    displayBoard();
+    updateDisplay();
     scoreBoardOutput.innerHTML = "";
   });
 
@@ -247,15 +258,19 @@ function DisplayController() {
     game.resetGame();
     nextGameButton.disabled = true;
     scoreBoardOutput.innerHTML = "";
-    displayScoreBoard();
-    displayBoard();
+    updateDisplay();
   })
 
   // When the Set Player Names button is clicked, show the form
   initializeDialog();
 
+  const updateDisplay = () => {
+    displayScoreBoard();
+    displayBoard();
+  }
+
   const displayScoreBoard = () => {
-    let score = game.score.getScores()
+    let score = game.getScores();
     let players = game.getPlayers();
     let currentPlayer = game.getCurrentPlayer();
     let playerOne = players.find((player) => player.number === 1);
@@ -277,8 +292,9 @@ function DisplayController() {
   }
 
   const displayBoard = () => {
+    boardValues = game.getBoardValues();
     for (let i = 0; i < cellCount; i++) {
-      displayGrid[i].innerHTML = convertValue(game.board.getBoardValues()[i].getValue());
+      displayGrid[i].innerHTML = convertValue(boardValues[i]);
     };
   };
 
@@ -327,16 +343,18 @@ function DisplayController() {
 
       form.reset();
 
-      displayScoreBoard();
-      displayBoard();
+      updateDisplay();
     })
   }
 
   return {
-    displayBoard, displayScoreBoard, game
+    updateDisplay
   };
-}
+};
 
-display = DisplayController();
-display.displayScoreBoard();
-display.displayBoard();
+function main() {
+  display = DisplayController();
+  display.updateDisplay();
+};
+
+main();
