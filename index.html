@@ -16,17 +16,23 @@
     <div class="hero-right">
       <button class="btn" id="setPlayerNamesButton">Set Player Names</button>
       <button class="btn" id="resetScoresButton">Reset Scores</button>
-      <button class="btn" id="nextGameButton" disabled>Next Game</button>
+      <button class="btn next-game" id="nextGameButton" disabled>Next Game</button>
     </div>
   </div>
 
   <div class="container score-board">
-    <div id="playerOneName">Player 1: X</div>
-    <div id="playerTwoName">Player 2: O</div>
-    <div>Tied</div>
-    <div id="playerOneWins">0</div>
-    <div id="playerTwoWins">0</div>
-    <div id="tiedGames">0</div>
+    <div class="container score-board__grid">
+      <div id="playerOneName" class="score-board__header">Player 1: X</div>
+      <div id="playerTwoName" class="score-board__header">Player 2: O</div>
+      <div class="score-board__header">Tied</div>
+      <div id="playerOneWins">0</div>
+      <div id="playerTwoWins">0</div>
+      <div id="tiedGames">0</div>
+    </div>
+    <div class="container score-board__output">
+      <div id="scoreBoardOutput"></div>
+    </div>
+
   </div>
 
   <div class="container board">
@@ -42,7 +48,6 @@
   </div>
 
   <dialog>
-    <p>Set player names.</p>
     <form action="#" method="get" class="form">
       <fieldset>
         <div class="form-item">

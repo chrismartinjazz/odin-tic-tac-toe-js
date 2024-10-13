@@ -24,7 +24,9 @@
     - DONE Set current player to player with X token
   - DONE Button to restart game (reset scores)
   - DONE Players put in own names (use dialog and form)
-- Styling and images etc.
+  - DONEAdd a text element feedback when the game is won - "Player One wins"
+- DONE Styling and images etc.
+- Tidy up code and refactor a little bit.
 
 ## Looking at <https://www.ayweb.dev/blog/building-a-house-from-the-inside-out>
 

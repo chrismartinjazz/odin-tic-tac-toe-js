@@ -1,14 +1,14 @@
 const cellCount = 9;
 
 function GameBoard() {
-  // Initialize board with getter
+  // Initialization
   let board = [];
   for (let i = 0; i < cellCount; i++) {
     board.push(Cell());
   }
-  const getBoard = () => board;
 
-  // Initialize win conditions
+  const getBoardValues = () => board;
+
   const winConditions = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
     [0, 3, 6], [1, 4, 7],
@@ -190,6 +190,7 @@ function DisplayController() {
   const playerOneWins = document.querySelector("#playerOneWins");
   const playerTwoWins = document.querySelector("#playerTwoWins");
   const tiedGames = document.querySelector("#tiedGames");
+  const scoreBoardOutput = document.querySelector("#scoreBoardOutput");
   const setPlayerNamesButton = document.querySelector("#setPlayerNamesButton");
   const resetScoresButton = document.querySelector("#resetScoresButton");
   const nextGameButton = document.querySelector("#nextGameButton");
@@ -206,9 +207,31 @@ function DisplayController() {
       let result = game.makeMove(i);
       displayScoreBoard();
       displayBoard();
-      if (result) { enableNextGameButton() };
+      if (result) {
+        enableNextGameButton();
+        displayWinner(result);
+      };
     });
   };
+
+  const displayWinner = (result) => {
+    let winnerText;
+    switch (result) {
+      case "tie":
+        winnerText = "Tied game";
+        break;
+      case 1:
+        winnerText = `${game.getPlayers()[0].name} won the game`;
+        break;
+      case 2:
+        winnerText = `${game.getPlayers()[1].name} won the game`;
+        break;
+      default:
+        winnerText = "";
+    }
+    console.log(winnerText);
+    scoreBoardOutput.innerHTML = winnerText;
+  }
 
   // When the Next Game button is clicked, start next game
   nextGameButton.addEventListener("click", () => {
@@ -216,12 +239,14 @@ function DisplayController() {
     nextGameButton.disabled = true;
     displayScoreBoard();
     displayBoard();
-  })
+    scoreBoardOutput.innerHTML = "";
+  });
 
   // When the Reset Scores button is clicked, reset the scores
   resetScoresButton.addEventListener("click", () => {
     game.resetGame();
     nextGameButton.disabled = true;
+    scoreBoardOutput.innerHTML = "";
     displayScoreBoard();
     displayBoard();
   })
@@ -253,7 +278,7 @@ function DisplayController() {
 
   const displayBoard = () => {
     for (let i = 0; i < cellCount; i++) {
-      displayGrid[i].innerHTML = convertValue(game.board.getBoard()[i].getValue());
+      displayGrid[i].innerHTML = convertValue(game.board.getBoardValues()[i].getValue());
     };
   };
 
